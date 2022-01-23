@@ -263,7 +263,11 @@ class AlphaNode(Node):
         %(u)s'http://www.w3.org/1999/02/22-rdf-syntax-ns#typehttp://www.w3.org/2002/07/owl#InverseFunctionalProperty'
         """
         if groundTermHash:
-            return ''.join([term for term in self.triplePattern
+            #easton modified
+            #return ''.join([term for term in self.triplePattern
+            #                if not isinstance(term, (BNode, Variable)) or \
+            #                   isinstance(term, BNode) and term in skolemTerms])
+            return ''.join([unicode(term) for term in self.triplePattern
                             if not isinstance(term, (BNode, Variable)) or \
                                isinstance(term, BNode) and term in skolemTerms])
         else:

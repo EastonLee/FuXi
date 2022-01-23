@@ -96,7 +96,19 @@ def MathEqualTo(subject, object_):
         if not isinstance(term, Variable):
             assert isinstance(term, Literal), \
                 "math:equalTo can only be used with Literals (%s)" % term
-            assert isinstance(term.toPython(), (int, float)), \
+            #easton modified, add 'long'.
+            assert isinstance(term.toPython(), (int, float, long)), \
+                "math:equalTo can only be used " + \
+                "with Numeric Literals (%s)" % term
+
+#easton copied and modified.
+def MathNotEqualTo(subject, object_):
+    for term in [subject, object_]:
+        if not isinstance(term, Variable):
+            assert isinstance(term, Literal), \
+                "math:equalTo can only be used with Literals (%s)" % term
+            #easton modified, add 'long'.
+            assert isinstance(term.toPython(), (int, float, long)), \
                 "math:equalTo can only be used " + \
                 "with Numeric Literals (%s)" % term
 
@@ -107,11 +119,42 @@ def MathEqualTo(subject, object_):
             assert isinstance(term.toPython(), (int, float)), \
                 "math:equalTo can only be used with " + \
                 "Numeric Literals (%s)" % term
-        return s.toPython() == o.toPython()
+        return not (s.toPython() == o.toPython())
     return func
 
-
 def MathGreaterThan(subject, object_):
+    for term in [subject, object_]:
+        if not isinstance(term, Variable):
+            #easton: i made it able to support current_dateTime comparison like this:
+            #{:current_dateTime math:greaterThan 2.} => {:i :am :good2}.
+            #from rdflib import Graph, XSD
+            #eaNs = Namespace('http://eastonadams.net/#')
+            #if isinstance(term, URIRef):
+            #    term = .(eaNs.current_dateTime, XSD.dateTime,)
+            assert isinstance(term, Literal), \
+                "math:greaterThan can only be used with Literals (%s)" % term
+            #easton modified to make it support datetime comparison
+            #print type(term.toPython())
+            from datetime import datetime
+            assert isinstance(term.toPython(), (int, float, datetime, long)), \
+                "math:greaterThan can only be used with " + \
+                "Numeric Literals (%s)" % term
+
+    def greaterThanF(s, o):
+        for term in [s, o]:
+            assert isinstance(term, Literal), \
+                "math:greaterThan can only be used with Literals (%s)" % term
+            #easton modified to make it support datetime comparison
+            assert isinstance(term.toPython(), (int, float, datetime, long)), \
+                "math:greaterThan can only be used " + \
+                "with Numeric Literals (%s)" % term
+        #print s, o
+        #print s.toPython(), o.toPython()
+        return s.toPython() > o.toPython()
+    return greaterThanF
+
+#eatson copied and modified
+def MathNotGreaterThan(subject, object_):
     for term in [subject, object_]:
         if not isinstance(term, Variable):
             assert isinstance(term, Literal), \
@@ -120,16 +163,15 @@ def MathGreaterThan(subject, object_):
                 "math:lessThan can only be used with " + \
                 "Numeric Literals (%s)" % term
 
-    def greaterThanF(s, o):
+    def not_greaterThanF(s, o):
         for term in [s, o]:
             assert isinstance(term, Literal), \
                 "math:greaterThan can only be used with Literals (%s)" % term
             assert isinstance(term.toPython(), (int, float)), \
                 "math:greaterThan can only be used " + \
                 "with Numeric Literals (%s)" % term
-        return s.toPython() > o.toPython()
-    return greaterThanF
-
+        return not (s.toPython() > o.toPython())
+    return not_greaterThanF
 
 def MathLessThan(subject, object_):
     for term in [subject, object_]:
@@ -173,6 +215,7 @@ def MathNotLessThan(subject, object_):
 FUNCTIONS = {
 }
 
+#easton questioned: why so much None?
 FILTERS = {
     LOG_NS.equalTo: LogEqualTo,
     LOG_NS.includes: None,
@@ -181,8 +224,12 @@ FILTERS = {
     MATH_NS.equalTo: MathEqualTo,
     MATH_NS.greaterThan: MathGreaterThan,
     MATH_NS.lessThan: MathLessThan,
-    MATH_NS.notEqualTo: None,
-    MATH_NS.notGreaterThan: None,
+    #easton modified.
+    #MATH_NS.notEqualTo: None,
+    MATH_NS.notEqualTo: MathNotEqualTo,
+    #easton modified.
+    #MATH_NS.notGreaterThan: None,
+    MATH_NS.notGreaterThan: MathNotGreaterThan,
     MATH_NS.notLessThan: MathNotLessThan,
     STRING_NS.contains: StringContains,
     STRING_NS.containsIgnoringCase: None,

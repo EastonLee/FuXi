@@ -141,6 +141,9 @@ class HashablePatternList(object):
         hash function consists of the hash of the terms concatenated in order
         """
         if isinstance(item, tuple):
+            #easton added.
+            #print 'item length', len(item)
+            #pprint(item)
             return reduce(lambda x, y: x + y, [
                             i for i in item
                                 if not self.skipBNodes or not isinstance(i, BNode)
@@ -328,13 +331,19 @@ class ReteNetwork:
         lhs = BNode()
         rhs = BNode()
         builtins = []
-        for term in rule.formula.body:
-            if isinstance(term, N3Builtin):
-                #We want to move builtins to the 'end' of the body
-                #so they only apply to the terminal nodes of
-                #the corresponding network
-                builtins.append(term)
-            else:
+        #easton: i think the original logic is wrong!
+        #for term in rule.formula.body:
+        #    if isinstance(term, N3Builtin):
+        #        #We want to move builtins to the 'end' of the body
+        #        #so they only apply to the terminal nodes of
+        #        #the corresponding network
+        #        builtins.append(term)
+        #    else:
+        #        self.ruleStore.formulae.setdefault(lhs, Formula(lhs)).append(term.toRDFTuple())
+        if isinstance(rule.formula.body, N3Builtin):
+            builtins.append(rule.formula.body)
+        else:
+            for term in rule.formula.body:
                 self.ruleStore.formulae.setdefault(lhs, Formula(lhs)).append(term.toRDFTuple())
         for builtin in builtins:
             self.ruleStore.formulae.setdefault(lhs, Formula(lhs)).append(builtin.toRDFTuple())

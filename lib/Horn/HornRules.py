@@ -327,8 +327,15 @@ class Clause(object):
         self.body = body
         self.head = head
         from FuXi.Rete.Network import HashablePatternList
-        antHash = HashablePatternList(
-                    [term.toRDFTuple() for term in body], skipBNodes=True)
+        if not isinstance(body, Uniterm):
+            for t in body:
+                type(t)
+        #easton modified, because the old version can't hash N3Builtin
+        #antHash = HashablePatternList(
+        #            [term.toRDFTuple() for term in body], skipBNodes=True)
+        from FuXi.Rete.RuleStore import N3Builtin
+        antHash = HashablePatternList([isinstance(body, N3Builtin) and body.toRDFTuple()] or
+                     [term.toRDFTuple() for term in body], skipBNodes=True)
         consHash = HashablePatternList(
                     [term.toRDFTuple() for term in head], skipBNodes=True)
         self._bodyHash = hash(antHash)

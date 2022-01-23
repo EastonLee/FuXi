@@ -356,7 +356,7 @@ BuiltIn used out of order
                     "Rule RHS must only include RDF triples (%s)" % item
         self.rules = [(self.formulae.get(lhs, Formula(lhs)),
                        self.formulae.get(rhs, Formula(rhs)))
-                                    for lhs, rhs in self.rules]
+                                for lhs, rhs in self.rules]
 
     def _checkVariableReferences(self, referencedVariables, terms, funcObj):
         for term in [i for i in terms if isinstance(i, Variable)]:
@@ -388,6 +388,9 @@ BuiltIn used out of order
         else:
             formula = self.formulae.get(context.identifier, Formula(context.identifier))
             if predicate in self.filters:
+                #easton modified.
+                if self.filters[predicate] == None:
+                    assert 0
                 newFilter = N3Builtin(predicate, self.filters[predicate](subject, obj), subject, obj)
                 #@attention: The non-deterministic parse order of an RDF graph makes this
                 #check hard to enforce
